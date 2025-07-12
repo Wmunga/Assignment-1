@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoWise Advisor - Smart Crypto Investment Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.bot .message-content.welcome {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .message.bot .message-content.disclaimer {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .crypto-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .crypto-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .crypto-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .crypto-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .crypto-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-rising { background: #28a745; }
+        .status-stable { background: #ffc107; }
+        .status-falling { background: #dc3545; }
+
+        .sustainability-score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .score-high { background: #d4edda; color: #155724; }
+        .score-medium { background: #fff3cd; color: #856404; }
+        .score-low { background: #f8d7da; color: #721c24; }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .suggestion-btn {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .suggestion-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .chatbot-container {
+                height: 90vh;
+                margin: 10px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .crypto-table {
+                font-size: 12px;
+            }
+            
+            .crypto-table th,
+            .crypto-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="header">
+            <h1>🌟 CryptoWise Advisor 🌟</h1>
+            <p>Your Smart Crypto Investment Guide</p>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message bot">
+                <div class="message-content welcome">
+                    <strong>🌟 Welcome to CryptoWise - Your Smart Crypto Investment Guide! 🌟</strong><br><br>
+                    I'm here to help you make informed cryptocurrency investment decisions based on:<br>
+                    • Profitability metrics (price trends, market cap)<br>
+                    • Sustainability factors (energy efficiency, project viability)<br><br>
+                    <strong>How can I assist you today?</strong><br>
+                    You can ask me about:<br>
+                    • Trending cryptocurrencies<br>
+                    • Sustainable investment options<br>
+                    • Specific cryptocurrency information<br>
+                    • General investment advice<br><br>
+                    Type 'help' for more options or 'exit' to quit.
+                </div>
+            </div>
+            
+            <div class="message bot">
+                <div class="message-content disclaimer">
+                    ⚠️ <strong>DISCLAIMER:</strong> Cryptocurrency investments are inherently risky. This advice is based on predefined rules and data. Always conduct your own research and consult with financial advisors before making investment decisions.
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="userInput" class="input-field" placeholder="Ask me about cryptocurrencies..." autocomplete="off">
+            <button onclick="sendMessage()" class="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Cryptocurrency database
+        const cryptoDb = {
+            "Bitcoin": {
+                symbol: "BTC",
+                price_trend: "rising",
+                market_cap: "high",
+                energy_use: "high",
+                sustainability_score: 5,
+                project_viability: "high",
+                description: "The original cryptocurrency, known for its security and widespread adoption."
+            },
+            "Ethereum": {
+                symbol: "ETH",
+                price_trend: "rising",
+                market_cap: "high",
+                energy_use: "medium",
+                sustainability_score: 7,
+                project_viability: "high",
+                description: "A decentralized platform enabling smart contracts and decentralized applications."
+            },
+            "Cardano": {
+                symbol: "ADA",
+                price_trend: "stable",
+                market_cap: "medium",
+                energy_use: "low",
+                sustainability_score: 8,
+                project_viability: "high",
+                description: "A proof-of-stake blockchain platform focused on sustainability and scalability."
+            },
+            "Solana": {
+                symbol: "SOL",
+                price_trend: "rising",
+                market_cap: "medium",
+                energy_use: "low",
+                sustainability_score: 8,
+                project_viability: "medium",
+                description: "High-performance blockchain supporting decentralized applications and marketplaces."
+            },
+            "Polkadot": {
+                symbol: "DOT",
+                price_trend: "stable",
+                market_cap: "medium",
+                energy_use: "low",
+                sustainability_score: 7,
+                project_viability: "high",
+                description: "A multi-chain network enabling different blockchains to transfer messages and value."
+            }
+        };
+
+        const sustainabilityThreshold = 7;
+
+        function addMessage(content, isUser = false, className = '') {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `message-content ${className}`;
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function getTrendingCryptos() {
+            return Object.fromEntries(
+                Object.entries(cryptoDb).filter(([name, data]) => data.price_trend === "rising")
+            );
+        }
+
+        function getSustainableCryptos() {
+            return Object.fromEntries(
+                Object.entries(cryptoDb).filter(([name, data]) => data.sustainability_score >= sustainabilityThreshold)
+            );
+        }
+
+        function getProfitableCryptos() {
+            return Object.fromEntries(
+                Object.entries(cryptoDb).filter(([name, data]) => 
+                    data.market_cap === "high" && data.price_trend === "rising"
+                )
+            );
+        }
+
+        function formatCryptoTable(cryptoDict, title) {
+            if (Object.keys(cryptoDict).length === 0) {
+                return `No cryptocurrencies found matching the criteria for ${title}.`;
+            }
+
+            let tableHTML = `<strong>${title}</strong><br><br>`;
+            tableHTML += '<table class="crypto-table">';
+            tableHTML += '<tr><th>Name</th><th>Symbol</th><th>Price Trend</th><th>Market Cap</th><th>Sustainability</th><th>Energy Use</th></tr>';
+            
+            for (const [name, data] of Object.entries(cryptoDict)) {
+                const trendClass = data.price_trend === 'rising' ? 'status-rising' : 
+                                 data.price_trend === 'stable' ? 'status-stable' : 'status-falling';
+                
+                const scoreClass = data.sustainability_score >= 8 ? 'score-high' : 
+                                 data.sustainability_score >= 6 ? 'score-medium' : 'score-low';
+                
+                tableHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td>${data.symbol}</td>
+                        <td><span class="status-indicator ${trendClass}"></span>${data.price_trend}</td>
+                        <td>${data.market_cap}</td>
+                        <td><span class="sustainability-score ${scoreClass}">${data.sustainability_score}/10</span></td>
+                        <td>${data.energy_use}</td>
+                    </tr>
+                `;
+            }
+            
+            tableHTML += '</table>';
+            return tableHTML;
+        }
+
+        function getCryptoInfo(cryptoName) {
+            const info = cryptoDb[cryptoName];
+            if (!info) {
+                return `Sorry, I don't have information about ${cryptoName}.`;
+            }
+
+            let response = `<strong>📊 ${cryptoName} (${info.symbol}) Information</strong><br><br>`;
+            response += `<strong>Description:</strong> ${info.description}<br>`;
+            response += `<strong>Price Trend:</strong> ${info.price_trend}<br>`;
+            response += `<strong>Market Cap:</strong> ${info.market_cap}<br>`;
+            response += `<strong>Energy Use:</strong> ${info.energy_use}<br>`;
+            response += `<strong>Sustainability Score:</strong> ${info.sustainability_score}/10<br>`;
+            response += `<strong>Project Viability:</strong> ${info.project_viability}<br><br>`;
+            
+            response += '<strong>Investment Consideration:</strong><br>';
+            if (info.price_trend === 'rising' && info.market_cap === 'high') {
+                response += '• Strong profitability potential due to rising price trend and high market cap';
+            } else if (info.energy_use === 'low' && info.sustainability_score >= 7) {
+                response += '• Strong sustainability profile with low energy use and high sustainability score';
+            } else {
+                response += '• Mixed profile - consider both profitability and sustainability factors';
+            }
+            
+            return response;
+        }
+
+        function processQuery(query) {
+            query = query.toLowerCase().trim();
+            
+            // Exit command
+            if (['exit', 'quit', 'bye'].includes(query)) {
+                return 'Thank you for using CryptoWise! Stay crypto-wise! 👋';
+            }
+            
+            // Help command
+            if (query === 'help') {
+                return `
+                    <strong>Available Commands:</strong><br><br>
+                    <strong>1. Trending & Profitability:</strong><br>
+                    • "Which crypto is trending up?"<br>
+                    • "What are the profitable coins?"<br>
+                    • "Show me trending cryptos"<br><br>
+                    <strong>2. Sustainability:</strong><br>
+                    • "What's the most sustainable coin?"<br>
+                    • "Show sustainable options"<br>
+                    • "Which crypto is most eco-friendly?"<br><br>
+                    <strong>3. Specific Information:</strong><br>
+                    • "Tell me about [cryptocurrency]"<br>
+                    • "What is [cryptocurrency]?"<br>
+                    • "Info on [cryptocurrency]"<br><br>
+                    <strong>4. General:</strong><br>
+                    • "help" - Show this help message<br>
+                    • "exit" - Quit the chatbot<br>
+                    • "disclaimer" - Show investment disclaimer
+                `;
+            }
+            
+            // Disclaimer command
+            if (query === 'disclaimer') {
+                return '⚠️ <strong>DISCLAIMER:</strong> Cryptocurrency investments are inherently risky. This advice is based on predefined rules and data. Always conduct your own research and consult with financial advisors before making investment decisions.';
+            }
+            
+            // Trending queries
+            if (['trending', 'trend', 'going up', 'rising'].some(phrase => query.includes(phrase))) {
+                return formatCryptoTable(getTrendingCryptos(), '📈 Trending Cryptocurrencies');
+            }
+            
+            // Sustainability queries
+            if (['sustainable', 'sustainability', 'eco', 'green', 'environment'].some(phrase => query.includes(phrase))) {
+                return formatCryptoTable(getSustainableCryptos(), '🌱 Sustainable Cryptocurrencies');
+            }
+            
+            // Profitability queries
+            if (['profitable', 'profit', 'investment', 'invest'].some(phrase => query.includes(phrase))) {
+                return formatCryptoTable(getProfitableCryptos(), '💰 Profitable Cryptocurrencies');
+            }
+            
+            // Specific crypto information
+            if (query.startsWith('tell me about') || query.startsWith('what is') || query.startsWith('info on') || query.startsWith('information about')) {
+                const words = query.split(' ');
+                const cryptoName = words[words.length - 1];
+                return getCryptoInfo(cryptoName);
+            }
+            
+            // Default response
+            return `
+                I'm not sure I understand. Here are some things you can ask me:<br>
+                • "Which crypto is trending up?"<br>
+                • "What's the most sustainable coin?"<br>
+                • "Tell me about Bitcoin"<br>
+                • Type 'help' for more options
+            `;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message
+            addMessage(message, true);
+            
+            // Clear input
+            input.value = '';
+            
+            // Process and add bot response
+            setTimeout(() => {
+                const response = processQuery(message);
+                addMessage(response);
+            }, 500);
+        }
+
+        // Handle Enter key
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Focus on input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('userInput').focus();
+        });
+    </script>
+</body>
+</html> 
